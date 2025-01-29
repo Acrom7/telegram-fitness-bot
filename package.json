@@ -1,12 +1,32 @@
 {
-  "name": "telegram-upload-bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "name": "telegram-upload-bot",
+    "version": "1.0.0",
+    "description": "",
+    "type": "module",
+    "engines": {
+        "node": ">=22.13.1",
+        "npm": ">=11.0.0"
+    },
+    "scripts": {
+        "start": "node-dev index.ts",
+        "run": "tsx index.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/fluent-ffmpeg": "^2.1.27",
+        "node-dev": "^8.0.0",
+        "ts-node": "^10.9.2",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.3"
+    },
+    "dependencies": {
+        "@aws-sdk/client-s3": "^3.735.0",
+        "@googleapis/sheets": "^9.3.1",
+        "axios": "^1.7.9",
+        "dotenv": "^16.4.7",
+        "google-spreadsheet": "^4.1.4",
+        "grammy": "^1.34.0"
+    }
 }
