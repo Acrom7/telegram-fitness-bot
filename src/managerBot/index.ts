@@ -1,8 +1,8 @@
 import { Bot, GrammyError, HttpError } from 'grammy';
-import { listGoogleVideos, listSelectel, start } from 'src/bot/commands';
-import { handleVideoMessage } from 'src/bot/messages';
+import { listGoogleVideos, listSelectel, start } from 'src/managerBot/commands';
+import { handleVideoMessage } from 'src/managerBot/messages';
 
-const bot = new Bot(process.env.BOT_TOKEN ?? '');
+const bot = new Bot(process.env.MANAGER_BOT_TOKEN ?? '');
 
 bot.catch((err) => {
     const ctx = err.ctx;
@@ -32,4 +32,4 @@ bot.api.setMyCommands([
 
 bot.on(':video', handleVideoMessage);
 
-export const startBot = () => bot.start();
+export const startManagerBot = () => bot.start();

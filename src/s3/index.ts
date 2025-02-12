@@ -1,4 +1,11 @@
-import { S3Client, ListObjectsV2Command, PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
+import {
+    GetObjectCommand,
+    ListObjectsV2Command,
+    PutObjectCommand,
+    PutObjectCommandInput,
+    S3Client,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const bucketName = process.env.S3_BUCKET_NAME;
 
@@ -26,18 +33,12 @@ export function getBucketObjects() {
     }));
 }
 
-export async function findObjectByName(objectName: string) {
-    const command = new ListObjectsV2Command({
+export async function getVideoUrl(objectName: string): Promise<string> {
+    const command = new GetObjectCommand({
         Bucket: bucketName,
-        Prefix: objectName,
+        Key: objectName,
+        ResponseContentType: 'video/mp4',
     });
 
-    try {
-        const response = await s3client.send(command);
-        const foundObject = response.Contents?.find((object) => object.Key === objectName);
-        return foundObject ?? null;
-    } catch (error) {
-        console.error('Error finding object:', error);
-        throw error;
-    }
+    return getSignedUrl(s3client, command, { expiresIn: 3600 });
 }

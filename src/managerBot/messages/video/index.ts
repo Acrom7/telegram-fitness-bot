@@ -1,16 +1,15 @@
 import type { Context, Middleware } from 'grammy';
 import { appendExercise } from 'src/googleSheets';
 import path from 'path';
-import { findObjectByName, uploadObject } from 'src/s3';
+import { uploadObject } from 'src/s3';
 import axios from 'axios';
 import fs from 'fs';
 import type { Filter } from 'grammy/out/filter';
 
-const __dirname = path.resolve();
-
 export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (ctx) => {
     const video = ctx.message?.video;
     const fileId = video?.file_id;
+    console.log({ video });
 
     if (!fileId) {
         await ctx.reply('No video file found in the message.');
@@ -19,29 +18,10 @@ export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (
     }
 
     const file = await ctx.api.getFile(fileId);
-    const fileUrl = `https://api.telegram.org/file/bot${bot.token}/${file.file_path}`;
-    const fileName = ctx.message?.caption ?? video?.file_name ?? 'unknown.mp4';
-    const filePath = path.join(__dirname, fileName);
+    const fileUrl = `https://api.telegram.org/file/bot${process.env.MANAGER_BOT_TOKEN}/${file.file_path}`;
+    const fileName = ctx.message?.caption ?? path.parse(video?.file_name ?? 'unknown.mp4').name;
+    const filePath = path.join(import.meta.dirname, fileName);
 
-    // try {
-    //     const existingObject = await findObjectByName(fileName);
-    //
-    //     if (existingObject) {
-    //         const repsponse = await ctx.reply('Видео с таким именем уже существует в Selectel. Хотите заменить его?', {
-    //             reply_markup: {
-    //                 keyboard: [
-    //                     ['Да', 'Нет'],
-    //                 ],
-    //             },
-    //         });
-    //
-    //         console.log({ repsponse });
-    //     }
-    // } catch (e) {
-    //
-    // }
-
-    // Download the video file
     const response = await axios({
         url: fileUrl,
         method: 'GET',
@@ -53,14 +33,12 @@ export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (
 
     writer.on('finish', async () => {
         try {
-            await ctx.reply(`Видео загружается...`);
+            await ctx.reply(`Видео **${fileName}** загружается...`, { parse_mode: 'MarkdownV2' });
             await uploadObject({
                 Key: fileName,
                 Body: fs.createReadStream(filePath),
             });
-            await ctx.reply(`Видео успешно загружено: ${fileName}`);
 
-            await ctx.reply('Добавляю видео в Google Таблицу...');
             await appendExercise(fileName);
             await ctx.reply('Видео успешно добавлено в Google Таблицу');
         } catch (error: any) {
