@@ -1,7 +1,13 @@
 import { Bot, GrammyError, HttpError, session } from 'grammy';
 import { start } from './commands';
-import { sendExercise, writeReport, startDayTraining } from './hears';
-import { START_TRAINING, NEXT_EXERCISE, WRITE_REPORT, BACK_TO_WEEK } from './const/keyboardSentences';
+import { nextExercise, startDayTraining, finishTraining } from './hears';
+import { handleReportMessage } from './messages';
+import {
+    START_TRAINING,
+    NEXT_EXERCISE,
+    BACK_TO_WEEK,
+    FINISH_TRAINING,
+} from './const/keyboardSentences';
 import { sessionStorage } from './sessionStorage';
 import { MiddlewareContext } from './types';
 import { DAYS_OF_WEEKS } from '@/types/dayOfWeek';
@@ -33,10 +39,14 @@ bot.catch((err) => {
 
 bot.command('start', start);
 bot.hears(BACK_TO_WEEK, start);
-bot.hears(START_TRAINING, sendExercise);
-bot.hears(NEXT_EXERCISE, sendExercise);
-// TODO: add write report
-bot.hears(WRITE_REPORT, writeReport);
+bot.hears(START_TRAINING, nextExercise);
+bot.hears(NEXT_EXERCISE, nextExercise);
+bot.hears(FINISH_TRAINING, finishTraining);
+bot
+    .on('message')
+    .filter((ctx) => ctx.session.isWaitingForUserReport,
+        handleReportMessage,
+    );
 
 DAYS_OF_WEEKS.forEach((day) => {
     bot.hears(day, startDayTraining);

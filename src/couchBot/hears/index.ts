@@ -1,3 +1,3 @@
-export * from './startTraining'
-export * from './writeReport'
+export * from './nextExercise'
 export * from './startDayTraining'
+export * from './finishTraining'

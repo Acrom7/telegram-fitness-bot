@@ -1,4 +1,4 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { WorksheetColumn, WorksheetRow } from '@/googleSheets/types';
 import { MAP_DAY_OF_WEEK_TO_COLUMN } from '@/googleSheets/const';
@@ -197,11 +197,33 @@ export async function getExercisesByDayOfWeek(username: string, dayOfWeek: DayOf
 export async function saveChatIdToWorksheet(username: string, chatId: number) {
     const userNameSheet = getSheetByUsername(username);
 
-
     await userNameSheet.loadHeaderRow();
 
     const rows = await userNameSheet.getRows<WorksheetRow>();
 
     rows[0]?.set(WorksheetColumn.ChatId, chatId);
     await rows[0]?.save();
+}
+
+export async function loadChatIdFromWorksheet(username: string) {
+    let userNameSheet: GoogleSpreadsheetWorksheet;
+
+    try {
+        userNameSheet = getSheetByUsername(username);
+    } catch (e) {
+        throw new BotError(ErrorCode.AdminNotFound);
+    }
+
+    await userNameSheet.loadHeaderRow();
+
+    const rows = await userNameSheet.getRows<WorksheetRow>();
+
+    const chatId = rows[0]?.get(WorksheetColumn.ChatId);
+    const chatIdNum = Number(chatId);
+
+    if (chatIdNum && !isNaN(chatIdNum)) {
+        return chatIdNum;
+    }
+
+    throw new BotError(ErrorCode.AdminNotFound);
 }
