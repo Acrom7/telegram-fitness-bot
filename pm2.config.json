@@ -1,0 +1,12 @@
+{
+    "apps": [
+        {
+            "name": "manager",
+            "script": "build/dist/entry-manager.js"
+        },
+        {
+            "name": "couch",
+            "script": "build/dist/entry-couch.js"
+        }
+    ]
+}
