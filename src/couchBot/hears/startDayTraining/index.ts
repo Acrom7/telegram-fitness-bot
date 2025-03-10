@@ -1,7 +1,7 @@
 import { Context, HearsMiddleware } from 'grammy';
-import { getExercisesByDayOfWeek, saveCurrentExerciseInfo } from 'src/googleSheets';
+import { getExercisesByDayOfWeek, saveCurrentExerciseInfo } from '@/googleSheets';
 import { BACK_TO_WEEK, START_TRAINING } from '@couch/const/keyboardSentences';
-import { DayOfWeek } from 'src/types/dayOfWeek';
+import { DayOfWeek } from '@/types/dayOfWeek';
 
 export const startDayTraining: HearsMiddleware<Context> = async (ctx) => {
     const dayOfWeek = ctx.message?.text as DayOfWeek;

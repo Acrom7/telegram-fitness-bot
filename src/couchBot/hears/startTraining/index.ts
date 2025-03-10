@@ -1,6 +1,6 @@
 import { Context, HearsMiddleware } from 'grammy';
-import { getCurrentExerciseInfo, getExerciseByNumber, saveCurrentExerciseInfo } from 'src/googleSheets';
-import { getVideoUrl } from 'src/s3';
+import { getCurrentExerciseInfo, getExerciseByNumber, saveCurrentExerciseInfo } from '@/googleSheets';
+import { getVideoUrl } from '@/s3';
 
 export const sendExercise: HearsMiddleware<Context> = async (ctx) => {
     await ctx.reply('Загружаю упражнение...', {

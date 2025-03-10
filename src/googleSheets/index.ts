@@ -1,27 +1,31 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
-import ConsoleAuth from 'google-console.json' with { type: 'json' };
-import { WorksheetColumn, WorksheetRow } from 'src/googleSheets/types';
-import { MAP_DAY_OF_WEEK_TO_COLUMN } from 'src/googleSheets/const';
-import { DayOfWeek, DAYS_OF_WEEKS } from 'src/types/dayOfWeek';
-import { Exercise } from 'src/types/exercise';
+import { WorksheetColumn, WorksheetRow } from '@/googleSheets/types';
+import { MAP_DAY_OF_WEEK_TO_COLUMN } from '@/googleSheets/const';
+import { DayOfWeek, DAYS_OF_WEEKS } from '@/types/dayOfWeek';
+import { Exercise } from '@/types/exercise';
+import { BotError, ErrorCode } from '@/const/BotError';
+import { GOOGLE_SPREADSHEET_EXERCISES_SHEET_NAME, GOOGLE_SPREADSHEET_ID } from '@/const/env';
+import ConsoleAuth from '@@/google-console.json' with { type: 'json' };
 
-const googleSpreadsheetExercisesSheetName = process.env.GOOGLE_SPREADSHEET_EXERCISES_SHEET_NAME ?? '';
 const exerciseColumnName = 'Список упражнений';
 
-// Initialize auth - see https://theoephraim.github.io/node-google-spreadsheet/#/guides/authentication
 const serviceAccountAuth = new JWT({
     email: ConsoleAuth.client_email,
     key: ConsoleAuth.private_key,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID ?? '', serviceAccountAuth);
+const doc = new GoogleSpreadsheet(GOOGLE_SPREADSHEET_ID, serviceAccountAuth);
 
-await doc.loadInfo();
+try {
+    await doc.loadInfo();
+} catch (e) {
+    console.error('Error loading Google Spreadsheet:', e);
+}
 
 export async function listAllExercises(): Promise<string> {
-    const rows = await doc.sheetsByTitle[googleSpreadsheetExercisesSheetName]?.getRows();
+    const rows = await doc.sheetsByTitle[GOOGLE_SPREADSHEET_EXERCISES_SHEET_NAME]?.getRows();
 
     if (!rows) {
         return 'No exercises found in the Google Sheet.';
@@ -33,7 +37,7 @@ export async function listAllExercises(): Promise<string> {
 }
 
 export async function appendExercise(exercise: string): Promise<void> {
-    const sheet = getSheetByUsername(googleSpreadsheetExercisesSheetName);
+    const sheet = getSheetByUsername(GOOGLE_SPREADSHEET_EXERCISES_SHEET_NAME);
 
     if (!sheet) {
         throw new Error('Упражнения не найдены');
@@ -48,7 +52,7 @@ export function getSheetByUsername(username: string) {
     const sheet = doc.sheetsByTitle[username];
 
     if (!sheet) {
-        throw new Error('Пользователь не найден');
+        throw new BotError(ErrorCode.UserNotFound);
     }
 
     return sheet;

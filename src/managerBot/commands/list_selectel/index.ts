@@ -1,6 +1,6 @@
 import type { Context, CommandMiddleware } from 'grammy';
-import { getBucketObjects } from 'src/s3';
-import { formatBytes } from 'src/utils/formatBytes';
+import { getBucketObjects } from '@/s3';
+import { formatBytes } from '@/utils/formatBytes';
 
 export const listSelectel: CommandMiddleware<Context> = async (ctx) => {
     try {

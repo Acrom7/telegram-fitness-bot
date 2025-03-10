@@ -1,9 +1,8 @@
 import 'dotenv/config';
-import { startManagerBot } from 'src/managerBot';
-import { startCouchBot } from 'src/personalCouchBot';
+import { startManagerBot } from '@/managerBot';
+import { startCouchBot } from '@/couchBot';
 
 await Promise.all([
     startManagerBot(),
     startCouchBot(),
 ]);
-

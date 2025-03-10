@@ -1,5 +1,5 @@
 import type { Context, CommandMiddleware } from 'grammy';
-import { listAllExercises } from 'src/googleSheets';
+import { listAllExercises } from '@/googleSheets';
 
 export const listGoogleVideos: CommandMiddleware<Context> = async (ctx) => {
     try {

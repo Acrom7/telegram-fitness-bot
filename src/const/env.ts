@@ -1,0 +1,10 @@
+export const MANAGER_BOT_TOKEN = process.env.MANAGER_BOT_TOKEN ?? '';
+export const COUCH_BOT_TOKEN = process.env.COUCH_BOT_TOKEN ?? '';
+export const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID ?? '';
+export const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY ?? '';
+export const S3_ENDPOINT = process.env.S3_ENDPOINT ?? '';
+export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME ?? '';
+export const S3_REGION = process.env.S3_REGION ?? '';
+export const GOOGLE_SPREADSHEET_ID = process.env.GOOGLE_SPREADSHEET_ID ?? '';
+export const BOTS_OWNER_USERNAME = process.env.BOTS_OWNER_USERNAME ?? '';
+export const GOOGLE_SPREADSHEET_EXERCISES_SHEET_NAME = process.env.GOOGLE_SPREADSHEET_EXERCISES_SHEET_NAME ?? '';

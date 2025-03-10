@@ -1,4 +1,4 @@
-import { DayOfWeek } from 'src/types/dayOfWeek';
+import { DayOfWeek } from '@/types/dayOfWeek';
 
 export const MAP_DAY_OF_WEEK_TO_COLUMN: Record<DayOfWeek, string> = {
     [DayOfWeek.Monday]: 'B',

@@ -1,15 +1,14 @@
-import type { Context, Middleware } from 'grammy';
-import { appendExercise } from 'src/googleSheets';
+import type { Context, Middleware, Filter } from 'grammy';
 import path from 'path';
-import { uploadObject } from 'src/s3';
 import axios from 'axios';
 import fs from 'fs';
-import type { Filter } from 'grammy/out/filter';
+import { uploadObject } from '@/s3';
+import { appendExercise } from '@/googleSheets';
+import { MANAGER_BOT_TOKEN } from '@/const/env';
 
 export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (ctx) => {
     const video = ctx.message?.video;
     const fileId = video?.file_id;
-    console.log({ video });
 
     if (!fileId) {
         await ctx.reply('No video file found in the message.');
@@ -18,7 +17,7 @@ export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (
     }
 
     const file = await ctx.api.getFile(fileId);
-    const fileUrl = `https://api.telegram.org/file/bot${process.env.MANAGER_BOT_TOKEN}/${file.file_path}`;
+    const fileUrl = `https://api.telegram.org/file/bot${MANAGER_BOT_TOKEN}/${file.file_path}`;
     const fileName = ctx.message?.caption ?? path.parse(video?.file_name ?? 'unknown.mp4').name;
     const filePath = path.join(import.meta.dirname, fileName);
 
