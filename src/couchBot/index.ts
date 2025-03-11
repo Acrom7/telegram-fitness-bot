@@ -13,6 +13,7 @@ import { MiddlewareContext } from './types';
 import { DAYS_OF_WEEKS } from '@/types/dayOfWeek';
 import { COUCH_BOT_TOKEN } from '@/const/env';
 import { BotError } from '@/const/BotError';
+import { createWeeklyReportCronJob } from '@couch/cron/weeklyReport';
 
 const bot = new Bot<MiddlewareContext>(COUCH_BOT_TOKEN);
 
@@ -51,5 +52,9 @@ bot
 DAYS_OF_WEEKS.forEach((day) => {
     bot.hears(day, startDayTraining);
 });
+
+const cronJob = createWeeklyReportCronJob(bot)
+
+cronJob.start();
 
 export const startCouchBot = () => bot.start();
