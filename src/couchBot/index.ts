@@ -1,7 +1,7 @@
 import { Bot, GrammyError, HttpError, session } from 'grammy';
 import { start } from './commands';
 import { nextExercise, startDayTraining, finishTraining } from './hears';
-import { handleReportMessage } from './messages';
+import { handleReportMessage, handleInitMessage } from './messages';
 import {
     START_TRAINING,
     NEXT_EXERCISE,
@@ -37,6 +37,8 @@ bot.catch((err) => {
 
     ctx.reply(error);
 });
+
+bot.on('message', handleInitMessage);
 
 bot.command('start', start);
 bot.hears(BACK_TO_WEEK, start);

@@ -1,5 +1,5 @@
 import { HearsMiddleware } from 'grammy';
-import { getCurrentExerciseInfo, getExerciseByNumber, saveCurrentExerciseInfo } from '@/googleSheets';
+import { saveWorksheetData } from '@/googleSheets';
 import { getVideoUrl } from '@/s3';
 import { MiddlewareContext } from '@couch/types';
 import { FINISH_TRAINING, NEXT_EXERCISE } from '@couch/const/keyboardSentences';
@@ -13,9 +13,9 @@ export const nextExercise: HearsMiddleware<MiddlewareContext> = async (ctx) => {
 
     const username = ctx.from?.username ?? '';
 
-    const { dayOfWeek, exerciseNumber } = await getCurrentExerciseInfo(username);
-    const exercise = await getExerciseByNumber({ username, dayOfWeek, exerciseNumber });
-    const isLastExercise = exerciseNumber === ctx.session.currentDayExercises.length;
+    const { currentExerciseNumber, currentDayExercises } = ctx.session;
+    const exercise = currentDayExercises[currentExerciseNumber - 1];
+    const isLastExercise = currentExerciseNumber === currentDayExercises.length;
 
     if (!exercise) {
         await ctx.reply('Тренировка закончена', {
@@ -23,7 +23,7 @@ export const nextExercise: HearsMiddleware<MiddlewareContext> = async (ctx) => {
                 keyboard: [[{ text: FINISH_TRAINING }]],
                 resize_keyboard: true,
             },
-        })
+        });
 
         return;
     }
@@ -40,5 +40,9 @@ ${exercise.description}`,
         },
     });
 
-    await saveCurrentExerciseInfo(username, dayOfWeek, exerciseNumber + 1);
+    ctx.session.currentExerciseNumber++;
+
+    await saveWorksheetData(username, {
+        exerciseNumber: currentExerciseNumber + 1,
+    });
 };

@@ -1,6 +1,6 @@
-import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
+import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
-import { WorksheetColumn, WorksheetRow } from '@/googleSheets/types';
+import { WorksheetColumn, WorksheetData, WorksheetRow } from '@/googleSheets/types';
 import { MAP_DAY_OF_WEEK_TO_COLUMN } from '@/googleSheets/const';
 import { DayOfWeek, DAYS_OF_WEEKS } from '@/types/dayOfWeek';
 import { Exercise } from '@/types/exercise';
@@ -110,35 +110,6 @@ export const getExerciseByNumber = async (options: Options): Promise<Exercise | 
     };
 };
 
-export async function saveCurrentExerciseInfo(username: string, dayOfWeek: DayOfWeek, exerciseNumber: number) {
-    const sheet = getSheetByUsername(username);
-    const rows = await sheet.getRows({
-        limit: 1,
-        offset: 0,
-    });
-
-    const row = rows[0];
-
-    row?.set(WorksheetColumn.ActiveWeekday, dayOfWeek);
-    row?.set(WorksheetColumn.ActiveExerciseNumber, exerciseNumber);
-
-    await row?.save();
-}
-
-export async function getCurrentExerciseInfo(username: string) {
-    const sheet = getSheetByUsername(username);
-    const rows = await sheet.getRows<WorksheetRow>({
-        limit: 1,
-        offset: 0,
-    });
-    const row = rows[0];
-
-    return {
-        dayOfWeek: row?.get(WorksheetColumn.ActiveWeekday) as DayOfWeek,
-        exerciseNumber: Number(row?.get(WorksheetColumn.ActiveExerciseNumber) ?? 1),
-    };
-}
-
 export async function getDaysOfWeeksWithTrainings(username: string) {
     const sheet = getSheetByUsername(username);
     const mondayColumnLetter = MAP_DAY_OF_WEEK_TO_COLUMN[DayOfWeek.Monday];
@@ -168,13 +139,6 @@ export async function getDaysOfWeeksWithTrainings(username: string) {
 }
 
 export async function getExercisesByDayOfWeek(username: string, dayOfWeek: DayOfWeek) {
-    const sheet = getSheetByUsername(username);
-    const columnLetter = MAP_DAY_OF_WEEK_TO_COLUMN[dayOfWeek];
-    const firstExerciseRowIndex = getStartExerciseRowIndex(1);
-    const lastExerciseRowIndex = getStartExerciseRowIndex(10);
-
-    await sheet.loadCells(`${columnLetter}${firstExerciseRowIndex}:${columnLetter}${lastExerciseRowIndex + 2}`);
-
     const result: Exercise[] = [];
 
     for (let i = 1; i <= 10; i++) {
@@ -194,39 +158,115 @@ export async function getExercisesByDayOfWeek(username: string, dayOfWeek: DayOf
     return result;
 }
 
-export async function saveChatIdToWorksheet(username: string, chatId: number) {
+export async function saveWorksheetData(username: string, data: Partial<WorksheetData>) {
+    const { exerciseNumber, chatId, dayOfWeek } = data;
+
     const userNameSheet = getSheetByUsername(username);
 
     await userNameSheet.loadHeaderRow();
 
     const rows = await userNameSheet.getRows<WorksheetRow>();
 
-    rows[0]?.set(WorksheetColumn.ChatId, chatId);
+    if (typeof chatId !== 'undefined') {
+        rows[0]?.set(WorksheetColumn.ChatId, chatId);
+    }
+
+    if (typeof exerciseNumber !== 'undefined') {
+        rows[0]?.set(WorksheetColumn.ActiveExerciseNumber, exerciseNumber);
+    }
+
+    if (typeof dayOfWeek !== 'undefined') {
+        rows[0]?.set(WorksheetColumn.ActiveWeekday, dayOfWeek);
+    }
+
     await rows[0]?.save();
 }
 
-export async function loadChatIdFromWorksheet(username: string) {
-    let userNameSheet: GoogleSpreadsheetWorksheet;
+export async function loadWorksheetData(username: string): Promise<WorksheetData> {
+    const result: WorksheetData = {
+        chatId: NaN,
+        dayOfWeek: DayOfWeek.Monday,
+        exerciseNumber: 1,
+    };
 
-    try {
-        userNameSheet = getSheetByUsername(username);
-    } catch (e) {
-        throw new BotError(ErrorCode.AdminNotFound);
-    }
+    const userNameSheet = getSheetByUsername(username);
 
     await userNameSheet.loadHeaderRow();
 
     const rows = await userNameSheet.getRows<WorksheetRow>();
 
-    const chatId = rows[0]?.get(WorksheetColumn.ChatId);
-    const chatIdNum = Number(chatId);
+    const chatId = Number(rows[0]?.get(WorksheetColumn.ChatId));
 
-    if (chatIdNum && !isNaN(chatIdNum)) {
-        return chatIdNum;
+    if (chatId && !isNaN(chatId)) {
+        result.chatId = chatId;
     }
 
-    throw new BotError(ErrorCode.AdminNotFound);
+    const exerciseNumber = Number(rows[0]?.get(WorksheetColumn.ActiveExerciseNumber));
+
+    if (exerciseNumber && !isNaN(exerciseNumber)) {
+        result.exerciseNumber = exerciseNumber;
+    }
+
+    const dayOfWeek = rows[0]?.get(WorksheetColumn.ActiveWeekday);
+
+    if (typeof dayOfWeek === 'string') {
+        result.dayOfWeek = dayOfWeek as DayOfWeek;
+    }
+
+    return result;
 }
+
+export async function initWorksheetStorage(username: string) {
+    const sheet = getSheetByUsername(username);
+
+    await sheet.loadHeaderRow();
+
+    const isHeaderRowPresent = [WorksheetColumn.ChatId, WorksheetColumn.ActiveExerciseNumber, WorksheetColumn.ActiveWeekday]
+        .every((column) => sheet.headerValues.includes(column));
+
+    if (isHeaderRowPresent) {
+        return;
+    }
+
+    await sheet.loadCells('J1:L2');
+
+    const initialValues = [
+        // заголовки
+        {
+            cellA1: 'J1',
+            value: WorksheetColumn.ChatId,
+        },
+        {
+            cellA1: 'K1',
+            value: WorksheetColumn.ActiveWeekday,
+        },
+        {
+            cellA1: 'L1',
+            value: WorksheetColumn.ActiveExerciseNumber,
+        },
+        // значения
+        {
+            cellA1: 'J2',
+            value: '',
+        },
+        {
+            cellA1: 'K2',
+            value: DayOfWeek.Monday,
+        },
+        {
+            cellA1: 'L2',
+            value: 1,
+        },
+    ];
+
+    for (const { cellA1, value } of initialValues) {
+        const cell = sheet.getCellByA1(cellA1);
+        cell.value = value;
+    }
+
+    await sheet.saveUpdatedCells();
+}
+
 
 export async function getAllClientsChatIds() {
     await doc.loadInfo();

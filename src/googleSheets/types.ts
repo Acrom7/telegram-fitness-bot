@@ -1,3 +1,5 @@
+import { DayOfWeek } from '@/types/dayOfWeek';
+
 export const enum WorksheetColumn {
     ChatId = 'chatId',
     ActiveWeekday = 'activeWeekday',
@@ -10,3 +12,8 @@ export type WorksheetRow = {
     [WorksheetColumn.ActiveExerciseNumber]: number;
 }
 
+export type WorksheetData = {
+    chatId: number;
+    dayOfWeek: DayOfWeek;
+    exerciseNumber: number;
+}

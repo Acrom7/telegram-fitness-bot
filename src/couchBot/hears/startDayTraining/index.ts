@@ -1,5 +1,5 @@
 import { HearsMiddleware } from 'grammy';
-import { getExercisesByDayOfWeek, saveCurrentExerciseInfo } from '@/googleSheets';
+import { getExercisesByDayOfWeek, saveWorksheetData } from '@/googleSheets';
 import { BACK_TO_WEEK, START_TRAINING } from '@couch/const/keyboardSentences';
 import { DayOfWeek } from '@/types/dayOfWeek';
 import { MiddlewareContext } from '@couch/types';
@@ -26,7 +26,10 @@ export const startDayTraining: HearsMiddleware<MiddlewareContext> = async (ctx) 
     });
 
     await Promise.all([
-        saveCurrentExerciseInfo(ctx.from?.username ?? '', dayOfWeek, 1),
+        saveWorksheetData(ctx.from?.username ?? '', {
+            exerciseNumber: 1,
+            dayOfWeek,
+        }),
         ctx.reply(exerciseList.join('\n\n'), {
             parse_mode: 'Markdown',
             reply_markup: {
