@@ -1,8 +1,8 @@
 import { HearsMiddleware } from 'grammy';
-import { saveWorksheetData } from '@/googleSheets';
 import { getVideoUrl } from '@/s3';
 import { MiddlewareContext } from '@couch/types';
 import { FINISH_TRAINING, NEXT_EXERCISE } from '@couch/const/keyboardSentences';
+import { saveWorksheetData } from '@/googleSheets';
 
 export const nextExercise: HearsMiddleware<MiddlewareContext> = async (ctx) => {
     await ctx.reply('Загружаю упражнение...', {

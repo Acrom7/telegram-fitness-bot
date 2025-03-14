@@ -9,3 +9,5 @@ export const MAP_DAY_OF_WEEK_TO_COLUMN: Record<DayOfWeek, string> = {
     [DayOfWeek.Saturday]: 'G',
     [DayOfWeek.Sunday]: 'H',
 }
+
+export const exerciseColumnName = 'Список упражнений';

@@ -3,8 +3,8 @@ import path from 'path';
 import axios from 'axios';
 import fs from 'fs';
 import { uploadObject } from '@/s3';
-import { appendExercise } from '@/googleSheets';
 import { MANAGER_BOT_TOKEN } from '@/const/env';
+import { appendExercise } from '@/googleSheets';
 
 export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (ctx) => {
     const video = ctx.message?.video;
