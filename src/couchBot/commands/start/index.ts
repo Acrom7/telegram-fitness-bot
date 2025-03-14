@@ -1,10 +1,7 @@
-import type { CommandContext, HearsContext } from 'grammy';
 import { MiddlewareContext } from '@couch/types';
 import { getDaysOfWeeksWithTrainings } from '@/googleSheets';
 
-export async function start(ctx: CommandContext<MiddlewareContext>): Promise<void>;
-export async function start(ctx: HearsContext<MiddlewareContext>): Promise<void>;
-export async function start(ctx: CommandContext<MiddlewareContext> | HearsContext<MiddlewareContext>) {
+export async function start(ctx: MiddlewareContext) {
     const username = ctx.from?.username;
 
     if (!username) {
@@ -27,4 +24,4 @@ export async function start(ctx: CommandContext<MiddlewareContext> | HearsContex
         Произошла ошибка.
         ${JSON.stringify(e, null, 2)}`);
     }
-};
+}

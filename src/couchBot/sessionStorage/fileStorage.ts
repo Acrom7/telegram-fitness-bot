@@ -9,6 +9,7 @@ export const fileStorage: SessionOptions<UserStorage> = {
         currentExerciseNumber: 1,
         isWaitingForUserReport: false,
         currentDayExercises: [],
+        isInitialized: false,
     }),
     storage: enhanceStorage({
         storage: new FileAdapter({
