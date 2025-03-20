@@ -32,7 +32,7 @@ export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (
 
     writer.on('finish', async () => {
         try {
-            await ctx.reply(`Видео **${fileName}** загружается...`, { parse_mode: 'MarkdownV2' });
+            await ctx.reply(`Видео <b>${fileName}</b> загружается`, { parse_mode: 'HTML' });
             await uploadObject({
                 Key: fileName,
                 Body: fs.createReadStream(filePath),
@@ -41,6 +41,7 @@ export const handleVideoMessage: Middleware<Filter<Context, ':video'>> = async (
             await appendExercise(fileName);
             await ctx.reply('Видео успешно добавлено в Google Таблицу');
         } catch (error: any) {
+            console.error(error);
             await ctx.reply(`Failed to upload video to S3: ${error.message}`);
         } finally {
             fs.unlinkSync(filePath);
